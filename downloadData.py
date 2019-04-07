@@ -1,16 +1,14 @@
-imUsingColab = False
-#
-# if imUsingColab:
-#     !pip install python-dotenv
-#     !pip install kaggle
-
 import zipfile
 import subprocess
 import os.path
-from dotenv import load_dotenv
-load_dotenv()
 
 def download(imUsingColab=False):
+    if imUsingColab:
+        subprocess.check_output(['pip','install', 'python-dotenv'])
+        subprocess.check_output(['pip','install', 'kaggle'])
+    from dotenv import load_dotenv
+    load_dotenv()
+
     zipPath = '/content/the-movies-dataset.zip' if imUsingColab else 'the-movies-dataset.zip'
     zipExists = os.path.isfile(zipPath)
 
