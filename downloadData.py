@@ -3,6 +3,7 @@ import subprocess
 import os.path
 
 def download(imUsingColab=False):
+    print("Im using colab status ",imUsingColab)
     if imUsingColab:
         print("Using Colab so going to install deps")
         subprocess.check_output(['pip','install', 'python-dotenv'])
