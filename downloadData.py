@@ -4,6 +4,7 @@ import os.path
 
 def download(imUsingColab=False):
     if imUsingColab:
+        print("Using Colab so going to install deps")
         subprocess.check_output(['pip','install', 'python-dotenv'])
         subprocess.check_output(['pip','install', 'kaggle'])
     from dotenv import load_dotenv
