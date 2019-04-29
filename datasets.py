@@ -29,8 +29,9 @@ def getMetadata():
     cols_to_drop = ['homepage', 'tagline', 'poster_path', 'adult', 'original_title']
     df = df[df.columns.drop(cols_to_drop)]
     
-    #Replaced movies with revenue of 0 to NaN.
+    #Replaced values with 0 to NaN.
     df['revenue'] = df['revenue'].replace(0, np.nan)
+    df['budget'] = df['budget'].replace(0, np.nan)
     
     #Drop rows with EOF error
     df = df.drop([19729, 19730, 29502, 29503, 35586, 35587])
