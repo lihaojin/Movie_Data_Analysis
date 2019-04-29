@@ -23,5 +23,7 @@ def getCredits():
 
 def getRatings():
     ratings_df = pd.read_csv("data/ratings.csv")
-    ratings_df = ratings_df.drop(columns=['userId'])
+    # Calculate the average rating for each movie, drop userId and timestamp
+    ratings_df = ratings_df.drop(columns = ['userId', 'timestamp'])
+    ratings_df = ratings_df.groupby('movieId', as_index=False).mean()
     return ratings_df
