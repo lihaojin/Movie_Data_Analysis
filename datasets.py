@@ -6,7 +6,6 @@ from ast import literal_eval
 
 
 def getCredits():
-    print("Loading dataframe")
     credits_df = pd.read_csv("data/credits.csv")
     # Changing the column names of credits_df for merging
     credits_df.columns = ['cast', 'crew', 'movieId']
@@ -21,3 +20,8 @@ def getCredits():
     credits_df = credits_df.reset_index(drop = True)
     credits_df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
     return credits_df
+
+def getRatings():
+    ratings_df = pd.read_csv("data/ratings.csv")
+    ratings_df = ratings_df.drop(columns=['userId'])
+    return ratings_df
