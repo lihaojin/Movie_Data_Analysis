@@ -26,7 +26,7 @@ def getMetadata():
     df = pd.read_csv('./data/movies_metadata.csv')
     
     #Drop columns
-    cols_to_drop = ['homepage', 'tagline', 'poster_path', 'adult', 'original_title']
+    cols_to_drop = ['homepage', 'tagline', 'poster_path', 'adult', 'original_title', 'imdb_id']
     df = df[df.columns.drop(cols_to_drop)]
     
     #Replaced values with 0 to NaN.
