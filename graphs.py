@@ -16,9 +16,17 @@ sns.set_style('whitegrid')
 sns.set(font_scale=1.25)
 pd.set_option('display.max_colwidth', 50)
 
-def createGraphs():
-    df = getMetadata()
+df = getMetadata()
+
+#Setting months and days to create another set of graphs based on time.
+month_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+day_order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     
+df['day'] = df['release_date'].apply(get_day)
+df['month'] = df['release_date'].apply(get_month)
+    
+
+def byLanguage():    
     #Checking for counts of movies in each language.
     lang_df = pd.DataFrame(df['original_language'].value_counts())
     lang_df['language'] = lang_df.index
@@ -30,10 +38,6 @@ def createGraphs():
     sns.barplot(x='language', y='number', data=lang_df.iloc[0:11])
     plt.title('Number of movies per language')
     plt.show()
-    
-    #Setting months and days to create another set of graphs based on time.
-    month_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    day_order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     
 def get_month(x):
     try:
@@ -49,14 +53,13 @@ def get_day(x):
     except:
         return np.nan
     
-    df['day'] = df['release_date'].apply(get_day)
-    df['month'] = df['release_date'].apply(get_month)
-    
+def byMonth():
     #Creating a bar graph depicting movies released per month.
     plt.figure(figsize=(12,6))
     plt.title("Number of Movies released in a particular month.")
     sns.countplot(x='month', data=df, order=month_order)
-    
+
+def byRevenue():
     #Another bar graph - this one showing revenue per month for blockbuster movies.
     month_mean = pd.DataFrame(df[df['revenue'] > 1e8].groupby('month')['revenue'].mean())
     month_mean['mon'] = month_mean.index
