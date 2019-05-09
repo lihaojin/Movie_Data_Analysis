@@ -33,6 +33,9 @@ def getMetadata():
     df['revenue'] = df['revenue'].replace(0, np.nan)
     df['budget'] = df['budget'].replace(0, np.nan)
     
+    #Changed budget type to numeric.
+    df['budget'] = pd.to_numeric(df['budget'], errors='coerce')
+    
     #Drop rows with EOF error
     df = df.drop([19729, 19730, 29502, 29503, 35586, 35587])
     
