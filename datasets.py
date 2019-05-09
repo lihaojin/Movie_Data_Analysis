@@ -29,12 +29,6 @@ def getMetadata():
     cols_to_drop = ['homepage', 'tagline', 'poster_path', 'adult', 'original_title', 'imdb_id']
     df = df[df.columns.drop(cols_to_drop)]
 
-    # Convert objects to an int
-    df['budget'] = df['budget'].astype(str).astype(int)
-    df['revenue'] = df['revenue'].astype(str).astype(int)
-    df['id'] = df['id'].astype(str).astype(int)
-    df.rename(columns ={'id': 'movieId'}, inplace=True)
-    
     #Replaced values with 0 to NaN.
     df['revenue'] = df['revenue'].replace(0, np.nan)
     df['budget'] = df['budget'].replace(0, np.nan)
@@ -127,6 +121,12 @@ def getMetadata():
     #Drop original companies column
     df = df.drop(columns = ['production_companies'])
 
+    df['budget'] = df['budget'].astype(str).astype(int)
+    df['revenue'] = df['revenue'].astype(str).astype(float)
+    df['id'] = df['id'].astype(str).astype(int)
+
+    # Convert objects to an int
+    df.rename(columns ={'id': 'movieId'}, inplace=True)
 
     return df
 
