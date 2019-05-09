@@ -35,13 +35,13 @@ def createGraphs():
     month_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     day_order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     
-    def get_month(x):
+def get_month(x):
     try:
         return month_order[int(str(x).split('-')[1]) - 1]
     except:
         return np.nan
     
-    def get_day(x):
+def get_day(x):
     try:
         year, month, day = (int(i) for i in x.split('-'))    
         answer = datetime.date(year, month, day).weekday()
