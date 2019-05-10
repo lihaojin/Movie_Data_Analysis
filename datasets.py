@@ -24,14 +24,18 @@ def getCredits():
 def getMetadata():
     #Read csv file
     df = pd.read_csv('./data/movies_metadata.csv')
-    
+
     #Drop columns
-    cols_to_drop = ['homepage', 'tagline', 'poster_path']
+    cols_to_drop = ['homepage', 'tagline', 'poster_path', 'adult', 'original_title', 'imdb_id']
     df = df[df.columns.drop(cols_to_drop)]
-    
+
+    #Replaced values with 0 to NaN.
+    df['revenue'] = df['revenue'].replace(0, np.nan)
+    df['budget'] = df['budget'].replace(0, np.nan)
+
     #Drop rows with EOF error
     df = df.drop([19729, 19730, 29502, 29503, 35586, 35587])
-    
+
     #Function to generate column with only 'name' key
     def getLang (langs):
         x = ast.literal_eval(langs)
@@ -40,21 +44,21 @@ def getMetadata():
             for i in range(len(x)):
                 name = list(x[i].get("name"))
                 new_x.append(x[i].get("name"))
-            
+
             return(new_x)
-        
+
         return langs
 
     #Make languages column
     languages = list(df.spoken_languages)
     lang_df = []
-    
+
     for i in range(0, len(languages), 1):
         try:
             #lang = []
             lang_df.append(getLang(languages[i]))
         #lang_df.append(lang)
-        
+
         except:
             print(i)
 
@@ -63,16 +67,16 @@ def getMetadata():
 
     #Drop original languages column
     df = df.drop(columns = ['spoken_languages'])
-    
-    
+
+
     #Make genres column
     genres = list(df.genres)
     genres_df = []
-    
+
     for i in range(0, len(genres), 1):
         try:
             genres_df.append(getLang(genres[i]))
-        
+
         except:
             print(i)
 
@@ -81,15 +85,15 @@ def getMetadata():
 
     #Drop original genres column
     df = df.drop(columns = ['genres'])
-    
+
     #Make countries column
     countries = list(df.production_countries)
     countries_df = []
-    
+
     for i in range(0, len(countries), 1):
         try:
             countries_df.append(getLang(countries[i]))
-        
+
         except:
             print(i)
 
@@ -98,16 +102,16 @@ def getMetadata():
 
     #Drop original countries column
     df = df.drop(columns = ['production_countries'])
-    
-    
+
+
     #Make companies column
     companies = list(df.production_companies)
     companies_df = []
-    
+
     for i in range(0, len(companies), 1):
         try:
             companies_df.append(getLang(companies[i]))
-        
+
         except:
             print(i)
 
@@ -116,12 +120,23 @@ def getMetadata():
 
     #Drop original companies column
     df = df.drop(columns = ['production_companies'])
+<<<<<<< HEAD
     
     #Convert release_date to Year, Month, Day columns
     df['release_date'] = df['release_date'].astype(str)
     df['release_date'] = [d.split('-') for d in df.release_date]
     df[['Year', 'Month', 'Date']] = pd.DataFrame(df.release_date.values.tolist(), index= df.index)
     df = df.drop(columns = ['release_date'])
+=======
+
+    df['budget'] = df['budget'].astype(str).astype(int)
+    df['revenue'] = df['revenue'].astype(str).astype(float)
+    df['id'] = df['id'].astype(str).astype(int)
+
+    # Convert objects to an int
+    df.rename(columns ={'id': 'movieId'}, inplace=True)
+
+>>>>>>> a2cbeac02219b64a59d757a92f33627c6142655d
     return df
 
 def getRatings():
