@@ -6,7 +6,6 @@ from ast import literal_eval
 
 
 def getCredits():
-    print("Loading dataframe")
     credits_df = pd.read_csv("data/credits.csv")
     # Changing the column names of credits_df for merging
     credits_df.columns = ['cast', 'crew', 'movieId']
@@ -118,5 +117,16 @@ def getMetadata():
     #Drop original companies column
     df = df.drop(columns = ['production_companies'])
     
-    
+    #Convert release_date to Year, Month, Day columns
+    df['release_date'] = df['release_date'].astype(str)
+    df['release_date'] = [d.split('-') for d in df.release_date]
+    df[['Year', 'Month', 'Date']] = pd.DataFrame(df.release_date.values.tolist(), index= df.index)
+    df = df.drop(columns = ['release_date'])
     return df
+
+def getRatings():
+    ratings_df = pd.read_csv("data/ratings.csv")
+    # Calculate the average rating for each movie, drop userId and timestamp
+    ratings_df = ratings_df.drop(columns = ['userId', 'timestamp'])
+    ratings_df = ratings_df.groupby('movieId', as_index=False).mean()
+    return ratings_df
