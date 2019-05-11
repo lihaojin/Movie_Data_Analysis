@@ -120,14 +120,12 @@ def getMetadata():
 
     #Drop original companies column
     df = df.drop(columns = ['production_companies'])
-<<<<<<< HEAD
     
     #Convert release_date to Year, Month, Day columns
     df['release_date'] = df['release_date'].astype(str)
     df['release_date'] = [d.split('-') for d in df.release_date]
-    df[['Year', 'Month', 'Date']] = pd.DataFrame(df.release_date.values.tolist(), index= df.index)
+    df[['year', 'month', 'day']] = pd.DataFrame(df.release_date.values.tolist(), index= df.index)
     df = df.drop(columns = ['release_date'])
-=======
 
     df['budget'] = df['budget'].astype(str).astype(int)
     df['revenue'] = df['revenue'].astype(str).astype(float)
@@ -136,7 +134,6 @@ def getMetadata():
     # Convert objects to an int
     df.rename(columns ={'id': 'movieId'}, inplace=True)
 
->>>>>>> a2cbeac02219b64a59d757a92f33627c6142655d
     return df
 
 def getRatings():
