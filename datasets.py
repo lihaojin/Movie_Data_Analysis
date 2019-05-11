@@ -124,7 +124,7 @@ def getMetadata():
     #Convert release_date to Year, Month, Day columns
     df['release_date'] = df['release_date'].astype(str)
     df['release_date'] = [d.split('-') for d in df.release_date]
-    df[['Year', 'Month', 'Date']] = pd.DataFrame(df.release_date.values.tolist(), index= df.index)
+    df[['year', 'month', 'day']] = pd.DataFrame(df.release_date.values.tolist(), index= df.index)
     df = df.drop(columns = ['release_date'])
 
     df['budget'] = df['budget'].astype(str).astype(int)
