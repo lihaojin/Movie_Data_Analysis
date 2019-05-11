@@ -21,6 +21,21 @@ def getCredits():
     credits_df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
     return credits_df
 
+
+#Function to generate column with only 'name' key
+def getLang (langs):
+    x = ast.literal_eval(langs)
+    if(len(x) != 0):
+        new_x = []
+        for i in range(len(x)):
+            name = list(x[i].get("name"))
+            new_x.append(x[i].get("name"))
+
+        return(new_x)
+
+    return langs
+
+
 def getMetadata():
     #Read csv file
     df = pd.read_csv('./data/movies_metadata.csv')
@@ -36,18 +51,6 @@ def getMetadata():
     #Drop rows with EOF error
     df = df.drop([19729, 19730, 29502, 29503, 35586, 35587])
 
-    #Function to generate column with only 'name' key
-    def getLang (langs):
-        x = ast.literal_eval(langs)
-        if(len(x) != 0):
-            new_x = []
-            for i in range(len(x)):
-                name = list(x[i].get("name"))
-                new_x.append(x[i].get("name"))
-
-            return(new_x)
-
-        return langs
 
     #Make languages column
     languages = list(df.spoken_languages)
@@ -133,7 +136,11 @@ def getMetadata():
 
     # Convert objects to an int
     df.rename(columns ={'id': 'movieId'}, inplace=True)
-
+    # Strip belongs_to_collection object to just names
+    def cleanName(obj):
+        if(not pd.isnull(obj)):
+            return ast.literal_eval(obj)['name']
+    df['belongs_to_collection'] = df['belongs_to_collection'].apply(cleanName)
     return df
 
 def getRatings():
