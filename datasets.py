@@ -158,9 +158,11 @@ def get_cast():
                 credits_dict[cast[i]['cast_id']]['name'] = []
                 credits_dict[cast[i]['cast_id']]['movies'] = []
                 credits_dict[cast[i]['cast_id']]['character'] = []
+                credits_dict[cast[i]['cast_id']]['gender'] = []
                 credits_dict[cast[i]['cast_id']]['name'].append(cast[i]['name'])
                 credits_dict[cast[i]['cast_id']]['movies'].append(credits_df.movieId[row])
                 credits_dict[cast[i]['cast_id']]['character'].append(cast[i]['character'])
+                credits_dict[cast[i]['cast_id']]['gender'].append(cast[i]['gender'])
 
     cast, val = zip(*credits_dict.items())
 
@@ -168,13 +170,15 @@ def get_cast():
     cast_df['name'] = ''
     cast_df['in_movies'] = ''
     cast_df['played_as'] = ''
+    cast_df['gender'] = ''
 
     # need a faster way
     for i in range(len(cast_df)):
         cast_df.name[i] = cast_df.data[i]['name'][0]
-    for i in range(len(cast_df)):
         cast_df.in_movies[i] = cast_df.data[i]['movies']
-    for i in range(len(cast_df)):
         cast_df.played_as[i] = cast_df.data[i]['character']
+        cast_df.gender[i] = int(cast_df.data[i]['gender'][0])
+    
+    cast_df = cast_df.drop('data', axis = 1)
 
     cast_df.to_csv("./clean_datasets/clean_cast.csv", index=False)
