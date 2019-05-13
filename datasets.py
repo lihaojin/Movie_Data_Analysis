@@ -182,3 +182,5 @@ def get_cast():
     cast_df = cast_df.drop('data', axis = 1)
 
     cast_df.to_csv("./clean_datasets/clean_cast.csv", index=False)
+    
+    return cast_df
