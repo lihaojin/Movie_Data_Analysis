@@ -123,7 +123,7 @@ def getMetadata():
 
     #Drop original companies column
     df = df.drop(columns = ['production_companies'])
-    
+
     #Convert release_date to Year, Month, Day columns
     df['release_date'] = df['release_date'].astype(str)
     df['release_date'] = [d.split('-') for d in df.release_date]
@@ -149,3 +149,43 @@ def getRatings():
     ratings_df = ratings_df.drop(columns = ['userId', 'timestamp'])
     ratings_df = ratings_df.groupby('movieId', as_index=False).mean()
     return ratings_df
+
+def get_cast():
+    # returns a dataset with the name of the actor/actress, movies they've been in, and characters they've played as
+    credits_df = pd.read_csv("data/credits.csv")
+    credits_dict = {}
+    for row in range(len(credits_df)):
+        cast = literal_eval(credits_df.cast[row])
+        for i in range(len(cast)):
+            if cast[i]['cast_id'] in credits_dict:
+                credits_dict[cast[i]['cast_id']]['movies'].append(credits_df.movieId[row])
+                credits_dict[cast[i]['cast_id']]['character'].append(cast[i]['character'])
+            else:
+                credits_dict[cast[i]['cast_id']] = {}
+                credits_dict[cast[i]['cast_id']]['name'] = []
+                credits_dict[cast[i]['cast_id']]['movies'] = []
+                credits_dict[cast[i]['cast_id']]['character'] = []
+                credits_dict[cast[i]['cast_id']]['gender'] = []
+                credits_dict[cast[i]['cast_id']]['name'].append(cast[i]['name'])
+                credits_dict[cast[i]['cast_id']]['movies'].append(credits_df.movieId[row])
+                credits_dict[cast[i]['cast_id']]['character'].append(cast[i]['character'])
+                credits_dict[cast[i]['cast_id']]['gender'].append(cast[i]['gender'])
+
+    cast, val = zip(*credits_dict.items())
+
+    cast_df = pd.DataFrame({'castId': cast, 'data': val})
+    cast_df['name'] = ''
+    cast_df['in_movies'] = ''
+    cast_df['played_as'] = ''
+    cast_df['gender'] = ''
+
+    # need a faster way
+    for i in range(len(cast_df)):
+        cast_df.name[i] = cast_df.data[i]['name'][0]
+        cast_df.in_movies[i] = cast_df.data[i]['movies']
+        cast_df.played_as[i] = cast_df.data[i]['character']
+        cast_df.gender[i] = int(cast_df.data[i]['gender'][0])
+    
+    cast_df = cast_df.drop('data', axis = 1)
+
+    cast_df.to_csv("./clean_datasets/clean_cast.csv", index=False)
