@@ -23,7 +23,7 @@ def getLang (langs):
 
 
 def getMetadata(clean=False):
-
+    # Flag to reclean dataset or return cleaned one
     if(not clean):
         df = pd.read_csv('./clean_datasets/clean_metadata.csv')
         return df
@@ -47,7 +47,6 @@ def getMetadata(clean=False):
         #lang_df.append(lang)
         except:
             print(i)
-
     #Add languages column to dataframe
     df = df.assign(languages = lang_df)
     #Drop original languages column
@@ -60,7 +59,6 @@ def getMetadata(clean=False):
             genres_df.append(getLang(genres[i]))
         except:
             print(i)
-
     #Add genres column to dataframe
     df = df.assign(movie_genres = genres_df)
     #Drop original genres column
@@ -89,7 +87,6 @@ def getMetadata(clean=False):
     df = df.assign(companies = companies_df)
     #Drop original companies column
     df = df.drop(columns = ['production_companies'])
-
     #Convert release_date to Year, Month, Day columns
     df['release_date'] = df['release_date'].astype(str)
     df['release_date'] = [d.split('-') for d in df.release_date]
@@ -115,6 +112,9 @@ def getRatings(clean=False):
     return ratings_df
 
 def get_cast(clean=False):
+    if(not clean):
+        credits_df = pd.read_csv("clean_datasets/clean_cast.csv")
+        return credits_df
     # returns a dataset with the name of the actor/actress, movies they've been in, and characters they've played as
     credits_df = pd.read_csv("data/credits.csv")
     credits_dict = {}
