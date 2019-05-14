@@ -106,7 +106,6 @@ def getMetadata(clean=False):
 
 def getRatings(clean=False):
     if(not clean):
-        print("Getting cleaned ratings")
         ratings_df = pd.read_csv("./clean_datasets/clean_ratings.csv")
         return ratings_df
     ratings_df = pd.read_csv("data/ratings.csv")
@@ -196,7 +195,7 @@ def get_actors(clean=False):
     movie, directors = zip(*director.items())
     directors_df = pd.DataFrame({'movieId': movie, 'director': directors})
     directors_df.director = directors_df.director.map(lambda x: x[0])
-    df = pd.merge(directors_df, actor_df, on='movieId')  
+    df = pd.merge(directors_df, actor_df, on='movieId')
     # only need 5 actors
     df.drop(df.columns[7:], axis=1, inplace=True)
     col = ['actor1', 'actor2', 'actor3', 'actor4', 'actor5']
