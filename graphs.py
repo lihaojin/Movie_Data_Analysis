@@ -130,6 +130,7 @@ def genreWordCloud():
     plt.axis('off')
     plt.show()
 
+
 def decadePiechart():
     
     def stats(gr):
