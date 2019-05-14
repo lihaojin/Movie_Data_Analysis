@@ -122,10 +122,14 @@ def getMetadata(clean=False):
     return df
 
 def getRatings(clean=False):
+    if(not clean):
+        ratings_df = pd.read_csv("./clean_datasets/clean_ratings.csv")
+        return ratings_df
     ratings_df = pd.read_csv("data/ratings.csv")
     # Calculate the average rating for each movie, drop userId and timestamp
     ratings_df = ratings_df.drop(columns = ['userId', 'timestamp'])
     ratings_df = ratings_df.groupby('movieId', as_index=False).mean()
+    ratings_df.to_csv("./clean_datasets/clean_ratings.csv", index=False)
     return ratings_df
 
 def get_cast(clean=False):
@@ -154,7 +158,7 @@ def get_cast(clean=False):
                 credits_dict[cast[i]['cast_id']]['gender'].append(cast[i]['gender'])
 
     cast, val = zip(*credits_dict.items())
-    
+
     """ create a dataframe using the dictionary"""
     cast_df = pd.DataFrame({'castId': cast, 'data': val})
     cast_df['name'] = ''
@@ -167,11 +171,52 @@ def get_cast(clean=False):
         cast_df.in_movies[i] = cast_df.data[i]['movies']
         cast_df.played_as[i] = cast_df.data[i]['character']
         cast_df.gender[i] = int(cast_df.data[i]['gender'][0])
-    
+
     """ drop original column """
     cast_df = cast_df.drop('data', axis = 1)
-    
+
     """ create a csv file for cast_df """
     cast_df.to_csv("./clean_datasets/clean_cast.csv", index=False)
-    
+
     return cast_df
+
+def get_actors(clean=False):
+    if(not clean):
+        credits_df = pd.read_csv('./clean_datasets/clean_actor_director.csv')
+        return credits_df
+    credits_df = pd.read_csv("data/credits.csv")
+    credits_dict = {}
+    """ create dictionary to hold the actors of each movie"""
+    for index, row in credits_df.iterrows():
+        cast = literal_eval(credits_df.cast[index])
+        for i in range(len(cast)):
+            if credits_df['id'][index] in credits_dict:
+                credits_dict[credits_df['id'][index]].append(cast[i]['name'])
+            else:
+                credits_dict[credits_df['id'][index]] = []
+                credits_dict[credits_df['id'][index]].append(cast[i]['name'])
+    # separate the keys from the values
+    movieId, actor_actress = zip(*credits_dict.items())
+    actor_df = pd.DataFrame({'movieId': movieId, 'actor_actress': actor_actress})
+    actor_df = pd.DataFrame(actor_df.actor_actress.tolist(), index= actor_df.movieId)
+    actor_df.reset_index(level=0, inplace=True)
+    director = {}
+    """ create dictionary to hold the directors of each movie"""
+    for index, row in credits_df.iterrows():
+        cast = literal_eval(credits_df.crew[index])
+        for i in range(len(cast)):
+            if cast[i]['job'] == 'Director':
+                director[credits_df['id'][index]] = []
+                director[credits_df['id'][index]].append(cast[i]['name'])
+    # separate the keys from the values
+    movie, directors = zip(*director.items())
+    directors_df = pd.DataFrame({'movieId': movie, 'director': directors})
+    directors_df.director = directors_df.director.map(lambda x: x[0])
+    df = pd.merge(directors_df, actor_df, on='movieId')
+    # only need 5 actors
+    df.drop(df.columns[7:], axis=1, inplace=True)
+    col = ['actor1', 'actor2', 'actor3', 'actor4', 'actor5']
+    df.rename(columns=dict(zip(df.columns[2:], col)),inplace=True)
+    # create a csv file for the df
+    df.to_csv("./clean_datasets/clean_actor_director.csv", index=False)
+    return df
