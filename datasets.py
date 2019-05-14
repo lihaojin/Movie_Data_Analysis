@@ -163,7 +163,6 @@ def get_actors(clean=False):
     if(not clean):
         credits_df = pd.read_csv('./clean_datasets/clean_actor_director.csv')
         return credits_df
-
     credits_df = pd.read_csv("data/credits.csv")
     credits_dict = {}
     """ create dictionary to hold the actors of each movie"""
@@ -175,6 +174,7 @@ def get_actors(clean=False):
             else:
                 credits_dict[credits_df['id'][index]] = []
                 credits_dict[credits_df['id'][index]].append(cast[i]['name'])
+    # separate the keys from the values
     movieId, actor_actress = zip(*credits_dict.items())
     actor_df = pd.DataFrame({'movieId': movieId, 'actor_actress': actor_actress})
     actor_df = pd.DataFrame(actor_df.actor_actress.tolist(), index= actor_df.movieId)
@@ -185,17 +185,17 @@ def get_actors(clean=False):
         cast = literal_eval(credits_df.crew[index])
         for i in range(len(cast)):
             if cast[i]['job'] == 'Director':
-                if credits_df['id'][index] in director:
-                    director[credits_df['id'][index]].append(cast[i]['name'])
-                else:
-                    director[credits_df['id'][index]] = []
-                    director[credits_df['id'][index]].append(cast[i]['name'])
+                director[credits_df['id'][index]] = []
+                director[credits_df['id'][index]].append(cast[i]['name'])
+    # separate the keys from the values
     movie, directors = zip(*director.items())
-    directors_df = pd.DataFrame({'movieId': movie, 'directors': directors})
-    actor_direct_df = pd.merge(directors_df, actor_df, on='movieId')
-    col = []
-    for i in range(len(actor_direct_df)-2):
-        col.append('actor ' + str(i+1))
-    actor_direct_df.rename(columns=dict(zip(actor_direct_df.columns[2:], col)),inplace=True)
-    actor_direct_df.to_csv("./clean_datasets/clean_actor_director.csv", index=False)
-    return actor_direct_df
+    directors_df = pd.DataFrame({'movieId': movie, 'director': directors})
+    directors_df.director = directors_df.director.map(lambda x: x[0])
+    df = pd.merge(directors_df, actor_df, on='movieId')  
+    # only need 5 actors
+    df.drop(df.columns[7:], axis=1, inplace=True)
+    col = ['actor1', 'actor2', 'actor3', 'actor4', 'actor5']
+    df.rename(columns=dict(zip(df.columns[2:], col)),inplace=True)
+    # create a csv file for the df
+    df.to_csv("./clean_datasets/clean_actor_director.csv", index=False)
+    return df
