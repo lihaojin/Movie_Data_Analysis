@@ -63,6 +63,23 @@ def getMetadata(clean=False):
     df = df.assign(movie_genres = genres_df)
     #Drop original genres column
     df = df.drop(columns = ['genres'])
+
+    df['movie_genres'] = df['movie_genres'].astype(str)
+
+    movie_genres = []
+    def getGenres(genres):
+        new_genres = ""
+        for genre in ast.literal_eval(genres):
+            new_genres += genre
+            new_genres += '|'
+    
+    movie_genres.append(new_genres)
+
+    df['movie_genres'].apply(getGenres)
+    movie_genres = [x[:-1] for x in movie_genres]
+    df = df.assign(genres = movie_genres)
+    df = df.drop(columns = ['movie_genres'])
+
     #Make countries column
     countries = list(df.production_countries)
     countries_df = []
