@@ -7,9 +7,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-# import plotly
-# import plotly.plotly as py
-# import plotly.graph_objs as go
 from scipy import stats
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.dummy import DummyClassifier, DummyRegressor
@@ -17,9 +14,6 @@ from sklearn.model_selection import train_test_split
 sns.set_style('whitegrid')
 sns.set(font_scale=1.25)
 pd.set_option('display.max_colwidth', 50)
-
-# api key can be obtained from plot.ly
-# plotly.tools.set_credentials_file(username='', api_key='')
 
 df = datasets.getMetadata()
 ratings_df = datasets.getRatings()
@@ -81,7 +75,7 @@ def profit_by_genre():
     movies_ratings_df = pd.merge(df, ratings_df, on='movieId')
 
     # calculate the profit/loss for each movie
-    movies_ratings_df['profit_loss'] =      movies_ratings_df['revenue'].sub(movies_ratings_df['budget'], axis = 0)
+    movies_ratings_df['profit_loss'] = movies_ratings_df['revenue'].sub(movies_ratings_df['budget'], axis = 0)
 
     # replace NaN with 0
     movies_ratings_df['profit_loss'] = movies_ratings_df['profit_loss'].fillna(0.0)
@@ -104,42 +98,17 @@ def profit_by_genre():
     # drop brackets that were stored as a genre
     genre_dict.pop('[')
     genre_dict.pop(']')
-
+    
     genre, genre_profit = zip(*genre_dict.items())
-
     genre_df = pd.DataFrame({'genre':genre, 'profit':genre_profit})
-
-    # total profit of each genre
-    trace3 = go.Bar(
-        x = genre_df.genre,
-        y = genre_df.profit,
-        text = genre_df.profit,
-        textposition = 'auto',
-        marker=dict(
-            color='rgb(158,202,225)',
-            line=dict(
-                color='rgb(8,48,107)',
-                width=1.5,
-            )
-        ),
-        opacity=0.6
+    genre_df.genre = genre_df.genre.astype(str)
+    
+    """ total profit of each genre """
+    alt.Chart(genre_df).mark_bar().encode(
+        x='genre',
+        y='profit',
+        color='genre'
     )
-
-    data = [trace3]
-    layout = go.Layout(
-        title = 'Total Profit of Each Genre',
-    )
-
-    fig = go.Figure(data=data, layout=layout)
-    py.iplot(fig,
-            filename='Total-Profit-By-Genre.html',
-            auto_open=True,
-            image = 'png',
-            image_filename='total_profit_by_genre',
-            output_type='file',
-            image_width=800,
-            image_height=600,
-            validate=False)
 
 
 def genreWordCloud():
@@ -160,67 +129,3 @@ def genreWordCloud():
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis('off')
     plt.show()
-
-def rating_by_genre():
-    # graph for the average rating of each genre
-
-    # dictionary to store all of the ratings for each genre
-    rating_dict = {}
-    for row in range(len(movies_ratings_df)):
-        genre_length = len(movies_ratings_df.movie_genres[row])
-        for i in range(genre_length):
-            if movies_ratings_df.movie_genres[row][i] in rating_dict:
-                rating_dict[movies_ratings_df.movie_genres[row][i]].append(movies_ratings_df['rating'][row])
-            else:
-                rating_dict[movies_ratings_df.movie_genres[row][i]] = []
-                rating_dict[movies_ratings_df.movie_genres[row][i]].append(movies_ratings_df['rating'][row])
-
-    for genre in rating_dict:
-        rating_dict[genre] = np.mean(rating_dict[genre])
-
-    # drop brackets that were stored as a genre
-    rating_dict.pop('[')
-    rating_dict.pop(']')
-
-    genre, average_rating = zip(*rating_dict.items())
-    genre_rating_df = pd.DataFrame({'genre':genre, 'rating':average_rating})
-
-    # average rating of each genre
-    trace4 = go.Bar(
-        x = genre_rating_df.genre,
-        y = genre_rating_df.rating,
-        text = genre_rating_df.rating,
-        textposition = 'auto',
-        marker=dict(
-            color='rgb(158,202,225)',
-            line=dict(
-                color='rgb(8,48,107)',
-                width=1.5,
-            )
-        ),
-        opacity=0.6
-    )
-
-    data = [trace4]
-    layout = go.Layout(
-        title = 'Average Rating of Each Genre',
-        xaxis=dict(
-            range=[0, 5],
-            tickmode='linear',
-            ticks='outside',
-            tick0=0,
-            dtick=.5,
-            tickcolor='#000'
-        ),
-    )
-
-    fig = go.Figure(data=data, layout=layout)
-    py.iplot(fig,
-            filename='Average-Rating-of-Each-Genre.html',
-            auto_open=True,
-            image = 'png',
-            image_filename='average_rating_of_each_genre',
-            output_type='file',
-            image_width=800,
-            image_height=600,
-            validate=False)

@@ -118,6 +118,7 @@ def get_cast(clean=False):
     # returns a dataset with the name of the actor/actress, movies they've been in, and characters they've played as
     credits_df = pd.read_csv("data/credits.csv")
     credits_dict = {}
+    """ create the credits dictionary """
     for row in range(len(credits_df)):
         cast = literal_eval(credits_df.cast[row])
         for i in range(len(cast)):
@@ -136,20 +137,24 @@ def get_cast(clean=False):
                 credits_dict[cast[i]['cast_id']]['gender'].append(cast[i]['gender'])
 
     cast, val = zip(*credits_dict.items())
-
+    
+    """ create a dataframe using the dictionary"""
     cast_df = pd.DataFrame({'castId': cast, 'data': val})
     cast_df['name'] = ''
     cast_df['in_movies'] = ''
     cast_df['played_as'] = ''
     cast_df['gender'] = ''
 
-    # need a faster way
     for i in range(len(cast_df)):
         cast_df.name[i] = cast_df.data[i]['name'][0]
         cast_df.in_movies[i] = cast_df.data[i]['movies']
         cast_df.played_as[i] = cast_df.data[i]['character']
         cast_df.gender[i] = int(cast_df.data[i]['gender'][0])
-
+    
+    """ drop original column """
     cast_df = cast_df.drop('data', axis = 1)
-
+    
+    """ create a csv file for cast_df """
     cast_df.to_csv("./clean_datasets/clean_cast.csv", index=False)
+    
+    return cast_df
