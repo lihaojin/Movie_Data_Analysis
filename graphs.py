@@ -27,7 +27,7 @@ ratings_df = datasets.getRatings()
 #Setting months and days to create another set of graphs based on time.
 month_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 day_order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-# 
+#
 # df['day'] = df['release_date'].apply(get_day)
 # df['month'] = df['release_date'].apply(get_month)
 #
@@ -140,6 +140,36 @@ def profit_by_genre():
             image_width=800,
             image_height=600,
             validate=False)
+
+
+def genreAvgRevenueWordCloud():
+    from wordcloud import WordCloud, STOPWORDS
+    import matplotlib.pyplot as plt
+    revenueDict = {}
+    revenueCount = {}
+    def genreAvgRevenue(row):
+        if(not pd.isna(row['revenue'])):
+            for i in ast.literal_eval(row['movie_genres']):
+                if(i in revenueDict):
+                    revenueDict[i] = revenueDict[i] + row['revenue']
+                    revenueCount[i] = revenueCount[i] + 1
+                else:
+                    revenueDict[i] = row['revenue']
+                    revenueCount[i] = 1
+    movieRevenue = pd.DataFrame({'movie_genres': df['movie_genres'], 'revenue': df['revenue']})
+
+    for index, row in movieRevenue.iterrows():
+        genreAvgRevenue(row)
+    avgRevenue = {}
+    for i in revenueDict:
+        avgRevenue[i] = revenueDict[i]/revenueCount[i]
+    wordcloud = WordCloud(width=1050,height=900, background_color='white',
+                          max_words=1628,relative_scaling=0.7,
+                          normalize_plurals=False)
+    wordcloud.generate_from_frequencies(avgRevenue)
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis('off')
+    plt.show()
 
 
 def genreWordCloud():
