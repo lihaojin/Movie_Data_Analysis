@@ -129,3 +129,36 @@ def genreWordCloud():
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis('off')
     plt.show()
+
+
+def decadePiechart():
+    
+    def stats(gr):
+        return {'min':gr.min(),'max':gr.max(),'count': gr.count(),'mean':gr.mean()}
+    
+    def label(s):
+        val = (1900 + s, s)[s < 100]
+        chaine = '' if s < 30 else "{}'s".format(int(val))
+        return chaine
+    
+    df = pd.read_csv('./clean_datasets/clean_metadata.csv')
+    df['decade'] = df['year'].apply(lambda x:((x-1900)//10)*10)
+    
+    df = df.drop(df[df.decade < 10].index)
+    df = df.drop(df[df.decade > 110].index)
+    
+    test = df['year'].groupby(df['decade']).apply(stats).unstack()
+    
+    sns.set_context("poster", font_scale=0.85)
+    
+    plt.rc('font', weight='bold')
+    f, ax = plt.subplots(figsize=(11, 6))
+    labels = [label(s) for s in  test.index]
+    sizes  = test['count'].values
+    explode = [0.2 if sizes[i] < 100 else 0.01 for i in range(11)]
+    ax.pie(sizes, explode = explode, labels=labels,
+           autopct = lambda x:'{:1.0f}%'.format(x) if x > 1 else '',
+           shadow=False, startangle=0)
+    ax.axis('equal')
+    plt.show()
+
