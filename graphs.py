@@ -1,5 +1,5 @@
-
 from IPython.display import Image, HTML
+import datasets
 import json
 import datetime
 import ast
@@ -7,9 +7,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-import plotly
-import plotly.plotly as py
-import plotly.graph_objs as go
+# import plotly
+# import plotly.plotly as py
+# import plotly.graph_objs as go
 from scipy import stats
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.dummy import DummyClassifier, DummyRegressor
@@ -19,18 +19,18 @@ sns.set(font_scale=1.25)
 pd.set_option('display.max_colwidth', 50)
 
 # api key can be obtained from plot.ly
-plotly.tools.set_credentials_file(username='', api_key='')
+# plotly.tools.set_credentials_file(username='', api_key='')
 
-df = getMetadata()
-ratings_df = getRatings()
+df = datasets.getMetadata()
+ratings_df = datasets.getRatings()
 
 #Setting months and days to create another set of graphs based on time.
 month_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 day_order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
-df['day'] = df['release_date'].apply(get_day)
-df['month'] = df['release_date'].apply(get_month)
-
+# 
+# df['day'] = df['release_date'].apply(get_day)
+# df['month'] = df['release_date'].apply(get_month)
+#
 
 def byLanguage():
     #Checking for counts of movies in each language.
@@ -142,7 +142,24 @@ def profit_by_genre():
             validate=False)
 
 
-
+def genreWordCloud():
+    from wordcloud import WordCloud, STOPWORDS
+    import matplotlib.pyplot as plt
+    genreDict = {}
+    def genreCount(genres):
+        for i in ast.literal_eval(genres):
+            if(i in genreDict):
+                genreDict[i] = genreDict[i] + 1
+            else:
+                genreDict[i] = 1
+    df['movie_genres'].apply(genreCount)
+    wordcloud = WordCloud(width=1050,height=900, background_color='white',
+                      max_words=1628,relative_scaling=0.7,
+                      normalize_plurals=False)
+    wordcloud.generate_from_frequencies(genreDict)
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis('off')
+    plt.show()
 
 def rating_by_genre():
     # graph for the average rating of each genre

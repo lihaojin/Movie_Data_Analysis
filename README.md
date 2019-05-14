@@ -19,6 +19,7 @@ pip install kaggle
 pip install altair
 pip install vega
 pip install notebook
+pip install wordcloud
 ```
 
 Now you are ready to run the script
