@@ -105,10 +105,15 @@ def getMetadata(clean=False):
     return df
 
 def getRatings(clean=False):
+    if(not clean):
+        print("Getting cleaned ratings")
+        ratings_df = pd.read_csv("./clean_datasets/clean_ratings.csv")
+        return ratings_df
     ratings_df = pd.read_csv("data/ratings.csv")
     # Calculate the average rating for each movie, drop userId and timestamp
     ratings_df = ratings_df.drop(columns = ['userId', 'timestamp'])
     ratings_df = ratings_df.groupby('movieId', as_index=False).mean()
+    ratings_df.to_csv("./clean_datasets/clean_ratings.csv", index=False)
     return ratings_df
 
 def get_cast(clean=False):
