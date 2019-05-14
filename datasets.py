@@ -21,7 +21,26 @@ def getLang (langs):
 
     return langs
 
-
+def getKeywords(clean=False):
+    if(not clean):
+        df = pd.read_csv('./clean_datasets/clean_keywords.csv')
+        return df
+    keywords_df = pd.read_csv('./data/keywords.csv')
+    def parseKeywords(keywords):
+        movie_keywords = ast.literal_eval(keywords)
+        keywordListString = ""
+        for i in movie_keywords:
+            keywordListString = keywordListString + i['name'] + '|'
+        return keywordListString
+    id_keywords = {}
+    for index, row in keywords_df.iterrows():
+        id_keywords[row['id']] = parseKeywords(row['keywords'])
+    keyword_transform = {'movieId': id_keywords.keys(), 'keywords': id_keywords.values()}
+    id, keyword = zip(*id_keywords.items())
+    cleaned_keywords = pd.DataFrame({'movieId': id, 'keywords': keyword})
+    cleaned_keywords.to_csv("./clean_datasets/clean_keywords.csv", index=False)
+    return cleaned_keywords
+    
 def getMetadata(clean=False):
     # Flag to reclean dataset or return cleaned one
     if(not clean):
