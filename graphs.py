@@ -1,5 +1,4 @@
-%matplotlib inline
-%run datasets.py
+
 from IPython.display import Image, HTML
 import json
 import datetime

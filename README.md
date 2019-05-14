@@ -16,6 +16,9 @@ Next you need to ensure you have your required dependencies installed depending 
 ```
 pip install python-dotenv
 pip install kaggle
+pip install altair
+pip install vega
+pip install notebook
 ```
 
 Now you are ready to run the script
