@@ -104,7 +104,7 @@ def profit_by_genre():
     genre_df = pd.DataFrame({'genre':genre, 'profit':genre_profit})
     genre_df.genre = genre_df.genre.astype(str)
     
-    # total profit of each genre
+    """ total profit of each genre """
     alt.Chart(genre_df).mark_bar().encode(
         x='genre',
         y='profit',
