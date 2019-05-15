@@ -253,6 +253,3 @@ def mergeData(clean = False):
     df2.to_csv("./clean_datasets/clean_merged.csv", index=False)
     
     return df2
-    
-    
-    
