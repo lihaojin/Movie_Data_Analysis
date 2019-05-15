@@ -50,7 +50,7 @@ def keywords_inventory(dataframe, column = 'keywords'):
             category_keys.append(list(keywords_roots[s])[0])
             keywords_select[s] = list(keywords_roots[s])[0]
 
-    print("Nb of keywords in variable '{}': {}".format(column,len(category_keys)))
+    # print("Nb of keywords in variable '{}': {}".format(column,len(category_keys)))
     return category_keys, keywords_roots, keywords_select
 
 # Replacement of the keywords by the main form
@@ -133,7 +133,7 @@ def add_variables(df, REF_VAR):
 
 # Creates a list of N(= 31) films similar to the film selected by the user.
 def recommand(df, id_entry):
-    df_copy = df.copy(deep = True)    
+    df_copy = df.copy(deep = True)
     list_genres = set()
     for s in df['genres'].str.split('|').values:
         list_genres = list_genres.union(set(s))
@@ -236,8 +236,8 @@ def remove_sequels(film_selection):
 # Creates a list of 5 films that will be recommended to the user.
 def find_similarities(df, id_entry, del_sequels = True, verbose = False):
     if verbose:
-        print(90*'_' + '\n' + "QUERY: films similar to id={} -> '{}'".format(id_entry,
-                                df.iloc[id_entry]['title']))
+        print('{',end="")
+        print('"query":"{}",'.format(df.iloc[id_entry]['title']), end="")
     #____________________________________
     list_films = recommand(df, id_entry)
     #__________________________________
@@ -255,8 +255,72 @@ def find_similarities(df, id_entry, del_sequels = True, verbose = False):
     film_selection = add_to_selection(film_selection, parametres_films)
     #_____________________________________________
     selection_titles = []
+    print('"movies":[', end="")
     for i,s in enumerate(film_selection):
         selection_titles.append([s[0].replace(u'\xa0', u''), s[3]])
-        if verbose: print("nº{:<2}     -> {:<30}".format(i+1, s[0]))
-
+        if verbose:
+             print('"{}"'.format(s[0]), end ="")
+             if(not i == 2): print(',', end="")
+    print("]}",end="")
     return selection_titles
+
+def getSuggestions(df, id_entry):
+    set_keywords = set()
+    for list_keywords in df['keywords'].str.split('|').values:
+        if isinstance(list_keywords, float): continue  # only happen if list_keywords = NaN
+        set_keywords = set_keywords.union(list_keywords)
+    keyword_occurences, dum = count_word(df, 'keywords', set_keywords)
+    keyword_occurences[1:6]
+    df['genres'] = df['genres'].astype(str)
+    genre_labels = set()
+    for s in df['genres'].str.split('|').values:
+        genre_labels = genre_labels.union(set(s))
+    keyword_occurences, dum = count_word(df, 'genres', genre_labels)
+    keyword_occurences[:5]
+    doubled_entries = df[df.movieId.duplicated()]
+    doubled_entries.shape
+    df_temp = df
+    list_var_duplicates = ['title', 'year', 'directors']
+    list_duplicates = df_temp['title'].map(df_temp['title'].value_counts() > 1)
+    keywords, keywords_roots, keywords_select = keywords_inventory(df, column = 'keywords')
+    df_keywords_cleaned = replacement_df_keywords(df, keywords_select,roots = True)
+    keyword_occurences, keywords_count = count_word(df_keywords_cleaned,'keywords',keywords)
+    keyword_occurences[1:6]
+    keyword_occurences.sort(key = lambda x:x[1], reverse = False)
+    key_count = dict()
+    for s in keyword_occurences:
+        key_count[s[0]] = s[1]
+    #__________________________________________________________________________
+    # Creation of a dictionary to replace keywords by higher frequency keywords
+    replacement_mot = dict()
+    icount = 0
+    for index, [mot, nb_apparitions] in enumerate(keyword_occurences):
+        if nb_apparitions > 5: continue  # only the keywords that appear less than 5 times
+        lemma = get_synonyms(mot)
+        if len(lemma) == 0: continue     # case of the plurals
+        #_________________________________________________________________
+        list_mots = [(s, key_count[s]) for s in lemma
+                      if test_keyword(s, key_count, key_count[mot])]
+        list_mots.sort(key = lambda x:(x[1],x[0]), reverse = True)
+        if len(list_mots) <= 1: continue       # no replacement
+        if mot == list_mots[0][0]: continue    # replacement by himself
+        icount += 1
+        replacement_mot[mot] = list_mots[0][0]
+
+      # 2 successive replacements
+    #---------------------------
+    icount = 0
+    for s in replacement_mot.values():
+        if s in replacement_mot.keys():
+            icount += 1
+
+    for key, value in replacement_mot.items():
+        if value in replacement_mot.keys():
+            replacement_mot[key] = replacement_mot[value]
+    df_keywords_synonyms = replacement_df_keywords(df_keywords_cleaned, replacement_mot, roots = False)
+    keywords, keywords_roots, keywords_select = keywords_inventory(df_keywords_synonyms, column = 'keywords')
+    new_keyword_occurences, keywords_count = count_word(df_keywords_synonyms, 'keywords',keywords)
+    new_keyword_occurences[1:6]
+    df_keywords_occurence = replacement_df_low_frequency_keywords(df_keywords_synonyms, new_keyword_occurences)
+    keywords, keywords_roots, keywords_select = keywords_inventory(df_keywords_occurence, column = 'keywords')
+    dum = find_similarities(df, id_entry, del_sequels = True, verbose = True)

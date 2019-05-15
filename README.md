@@ -20,6 +20,8 @@ pip install altair
 pip install vega
 pip install notebook
 pip install wordcloud
+pip install wordnet
+pip install NLTK
 ```
 
 Now you are ready to run the script
