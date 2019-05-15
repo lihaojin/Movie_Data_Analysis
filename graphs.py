@@ -118,14 +118,14 @@ def genreAvgRevenueWordCloud():
     revenueCount = {}
     def genreAvgRevenue(row):
         if(not pd.isna(row['revenue'])):
-            for i in ast.literal_eval(row['movie_genres']):
+            for i in ast.literal_eval(row['genres']):
                 if(i in revenueDict):
                     revenueDict[i] = revenueDict[i] + row['revenue']
                     revenueCount[i] = revenueCount[i] + 1
                 else:
                     revenueDict[i] = row['revenue']
                     revenueCount[i] = 1
-    movieRevenue = pd.DataFrame({'movie_genres': df['movie_genres'], 'revenue': df['revenue']})
+    movieRevenue = pd.DataFrame({'genres': df['genres'], 'revenue': df['revenue']})
 
     for index, row in movieRevenue.iterrows():
         genreAvgRevenue(row)
@@ -151,7 +151,7 @@ def genreWordCloud():
                 genreDict[i] = genreDict[i] + 1
             else:
                 genreDict[i] = 1
-    df['movie_genres'].apply(genreCount)
+    df['genres'].apply(genreCount)
     wordcloud = WordCloud(width=1050,height=900, background_color='white',
                       max_words=1628,relative_scaling=0.7,
                       normalize_plurals=False)
