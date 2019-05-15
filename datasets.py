@@ -199,7 +199,7 @@ def get_cast(clean=False):
 
     return cast_df
 
-def get_actors(clean=False):
+def getActors(clean=False):
     if(not clean):
         credits_df = pd.read_csv('./clean_datasets/clean_actor_director.csv')
         return credits_df
@@ -239,3 +239,20 @@ def get_actors(clean=False):
     # create a csv file for the df
     df.to_csv("./clean_datasets/clean_actor_director.csv", index=False)
     return df
+
+def mergeData(clean = False):
+    if(not clean):
+        df2 = pd.read_csv('./clean_datasets/clean_merged.csv')
+        return df2
+    keywords = getKeywords()
+    metadata = getMetadata()
+    actors = getActors()
+    df = pd.merge(keywords, metadata, on='movieId')
+    df2 = pd.merge(df, actors, on='movieId')
+    
+    df2.to_csv("./clean_datasets/clean_merged.csv", index=False)
+    
+    return df2
+    
+    
+    
