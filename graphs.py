@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from scipy import stats
+import altair as alt
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.model_selection import train_test_split
@@ -67,7 +68,7 @@ def byRevenue():
     plt.title("Average Gross by the Month for Blockbuster Movies")
     sns.barplot(x='mon', y='revenue', data=month_mean, order=month_order)
 
-def profit_by_genre():
+def profit_by_genre(df=df):
     df = df.rename(index=str, columns={"id": "movieId"})
     df.movieId = df.movieId.astype(int)
     df.budget = df.budget.astype(float)
@@ -98,11 +99,11 @@ def profit_by_genre():
     # drop brackets that were stored as a genre
     genre_dict.pop('[')
     genre_dict.pop(']')
-    
+
     genre, genre_profit = zip(*genre_dict.items())
     genre_df = pd.DataFrame({'genre':genre, 'profit':genre_profit})
     genre_df.genre = genre_df.genre.astype(str)
-    
+
     """ total profit of each genre """
     alt.Chart(genre_df).mark_bar().encode(
         x='genre',
@@ -162,25 +163,25 @@ def genreWordCloud():
 
 
 def decadePiechart():
-    
+
     def stats(gr):
         return {'min':gr.min(),'max':gr.max(),'count': gr.count(),'mean':gr.mean()}
-    
+
     def label(s):
         val = (1900 + s, s)[s < 100]
         chaine = '' if s < 30 else "{}'s".format(int(val))
         return chaine
-    
+
     df = pd.read_csv('./clean_datasets/clean_metadata.csv')
     df['decade'] = df['year'].apply(lambda x:((x-1900)//10)*10)
-    
+
     df = df.drop(df[df.decade < 10].index)
     df = df.drop(df[df.decade > 110].index)
-    
+
     test = df['year'].groupby(df['decade']).apply(stats).unstack()
-    
+
     sns.set_context("poster", font_scale=0.85)
-    
+
     plt.rc('font', weight='bold')
     f, ax = plt.subplots(figsize=(11, 6))
     labels = [label(s) for s in  test.index]
@@ -191,4 +192,3 @@ def decadePiechart():
            shadow=False, startangle=0)
     ax.axis('equal')
     plt.show()
-
