@@ -7,13 +7,13 @@ from fuzzywuzzy import fuzz
 PS = nltk.stem.PorterStemmer()
 gaussian_filter = lambda x,y,sigma: math.exp(-(x-y)**2/(2*sigma**2))
 
-def count_word(df, ref_col, liste):
+def count_word(df, ref_col, list):
     keyword_count = dict()
-    for s in liste: keyword_count[s] = 0
-    for liste_keywords in df[ref_col].str.split('|'):
-        if type(liste_keywords) == float and pd.isnull(liste_keywords): continue
-        #for s in liste:
-        for s in [s for s in liste_keywords if s in liste]:
+    for s in list: keyword_count[s] = 0
+    for list_keywords in df[ref_col].str.split('|'):
+        if type(list_keywords) == float and pd.isnull(list_keywords): continue
+        #for s in list:
+        for s in [s for s in list_keywords if s in list]:
             if pd.notnull(s): keyword_count[s] += 1
     #______________________________________________________________________
     # convert the dictionary in a list to sort the keywords by frequency
@@ -23,13 +23,13 @@ def count_word(df, ref_col, liste):
     keyword_occurences.sort(key = lambda x:x[1], reverse = True)
     return keyword_occurences, keyword_count
 
-def keywords_inventory(dataframe, colonne = 'keywords'):
+def keywords_inventory(dataframe, column = 'keywords'):
     PS = nltk.stem.PorterStemmer()
     keywords_roots  = dict()  # collect the words / root
     keywords_select = dict()  # association: root <-> keyword
     category_keys = []
     icount = 0
-    for s in dataframe[colonne]:
+    for s in dataframe[column]:
         if pd.isnull(s): continue
         for t in s.split('|'):
             t = t.lower() ; racine = PS.stem(t)
@@ -50,29 +50,29 @@ def keywords_inventory(dataframe, colonne = 'keywords'):
             category_keys.append(list(keywords_roots[s])[0])
             keywords_select[s] = list(keywords_roots[s])[0]
                    
-    print("Nb of keywords in variable '{}': {}".format(colonne,len(category_keys)))
+    print("Nb of keywords in variable '{}': {}".format(column,len(category_keys)))
     return category_keys, keywords_roots, keywords_select
 
 # Replacement of the keywords by the main form
 #----------------------------------------------
-def remplacement_df_keywords(df, dico_remplacement, roots = False):
+def replacement_df_keywords(df, dico_replacement, roots = False):
     df_new = df.copy(deep = True)
     for index, row in df_new.iterrows():
-        chaine = row['keywords']
-        if pd.isnull(chaine): continue
-        nouvelle_liste = []
-        for s in chaine.split('|'): 
+        chain = row['keywords']
+        if pd.isnull(chain): continue
+        new_list = []
+        for s in chain.split('|'): 
             clef = PS.stem(s) if roots else s
-            if clef in dico_remplacement.keys():
-                nouvelle_liste.append(dico_remplacement[clef])
+            if clef in dico_replacement.keys():
+                new_list.append(dico_replacement[clef])
             else:
-                nouvelle_liste.append(s)       
-        df_new.set_value(index, 'keywords', '|'.join(nouvelle_liste)) 
+                new_list.append(s)       
+        df_new.set_value(index, 'keywords', '|'.join(new_list)) 
     return df_new
 
 # Get the synomyms of the word 'mot_cle'
 #--------------------------------------------------------------
-def get_synonymes(mot_cle):
+def get_synonyms(mot_cle):
     lemma = set()
     for ss in wordnet.synsets(mot_cle):
         for w in ss.lemma_names():
@@ -87,18 +87,18 @@ def get_synonymes(mot_cle):
 def test_keyword(mot, key_count, threshold):
     return (False , True)[key_count.get(mot, 0) >= threshold]
 
-def remplacement_df_low_frequency_keywords(df, keyword_occurences):
+def replacement_df_low_frequency_keywords(df, keyword_occurences):
     df_new = df.copy(deep = True)
     key_count = dict()
     for s in keyword_occurences: 
         key_count[s[0]] = s[1]    
     for index, row in df_new.iterrows():
-        chaine = row['keywords']
-        if pd.isnull(chaine): continue
-        nouvelle_liste = []
-        for s in chaine.split('|'): 
-            if key_count.get(s, 4) > 3: nouvelle_liste.append(s)
-        df_new.set_value(index, 'keywords', '|'.join(nouvelle_liste))
+        chain = row['keywords']
+        if pd.isnull(chain): continue
+        new_list = []
+        for s in chain.split('|'): 
+            if key_count.get(s, 4) > 3: new_list.append(s)
+        df_new.set_value(index, 'keywords', '|'.join(new_list))
     return df_new
 
 # Returns the values taken by the variables 'director_name', 'actor_N_name' (N ∈ [1:3]) and 'plot_keywords' for the film selected by the user.
@@ -122,25 +122,25 @@ def entry_variables(df, id_entry):
 # Adds a list of variables to the dataframe given in input and initializes these variables at 0 or 1 depending on the correspondance with the description of the films and the content of the REF_VAR variable given in input.
 def add_variables(df, REF_VAR):    
     for s in REF_VAR: df[s] = pd.Series([0 for _ in range(len(df))])
-    colonnes = ['genres', 'actor1', 'actor2',
+    columns = ['genres', 'actor1', 'actor2',
                 'actor3', 'actor4', 'actor5', 'directors', 'keywords']
-    for categorie in colonnes:
+    for category in columns:
         for index, row in df.iterrows():
-            if pd.isnull(row[categorie]): continue
-            for s in row[categorie].split('|'):
+            if pd.isnull(row[category]): continue
+            for s in row[category].split('|'):
                 if s in REF_VAR: df.set_value(index, s, 1)            
     return df
 
 # Creates a list of N(= 31) films similar to the film selected by the user.
 def recommand(df, id_entry):    
     df_copy = df.copy(deep = True)    
-    liste_genres = set()
+    list_genres = set()
     for s in df['genres'].str.split('|').values:
-        liste_genres = liste_genres.union(set(s))    
+        list_genres = list_genres.union(set(s))    
     #_____________________________________________________
     # Create additional variables to check the similarity
     variables = entry_variables(df_copy, id_entry)
-    variables += list(liste_genres)
+    variables += list(list_genres)
     df_new = add_variables(df_copy, variables)
     #____________________________________________________________________________________
     # determination of the closest neighbors: the distance is calculated / new variables
@@ -155,12 +155,12 @@ def recommand(df, id_entry):
 
     return indices[0][:]
 
-# Extracts some variables of the dataframe given in input and returns this list for a selection of N films. This list is ordered according to criteria established in the critere_selection() function.
-def extract_parameters(df, liste_films):     
+# Extracts some variables of the dataframe given in input and returns this list for a selection of N films. This list is ordered according to criteria established in the criteria_selection() function.
+def extract_parameters(df, list_films):     
     parametres_films = ['_' for _ in range(31)]
     i = 0
     max_users = -1
-    for index in liste_films:
+    for index in list_films:
         parametres_films[i] = list(df.iloc[index][['title', 'year', 
                                                    'vote_average',
                                                    'original_language',
@@ -171,36 +171,36 @@ def extract_parameters(df, liste_films):
         
     title_main = parametres_films[0][0]
     annee_ref  = parametres_films[0][1]
-    parametres_films.sort(key = lambda x:critere_selection(title_main, max_users,
+    parametres_films.sort(key = lambda x:criteria_selection(title_main, max_users,
                                     annee_ref, x[0], x[1], x[2], x[4]), reverse = True)
 
     return parametres_films 
 
 # Compares the 2 titles passed in input and defines if these titles are similar or not.
-def sequel(titre_1, titre_2):    
-    if fuzz.ratio(titre_1, titre_2) > 50 or fuzz.token_set_ratio(titre_1, titre_2) > 50:
+def sequel(title_1, title_2):    
+    if fuzz.ratio(title_1, title_2) > 50 or fuzz.token_set_ratio(title_1, title_2) > 50:
         return True
     else:
         return False
 
 # Gives a mark to a film depending on its IMDB score, the title year and the number of users who have voted for this film.
-def critere_selection(title_main, max_users, annee_ref, titre, annee, imdb_score, votes):    
+def criteria_selection(title_main, max_users, annee_ref, title, annee, imdb_score, votes):    
     if pd.notnull(annee_ref):
-        facteur_1 = gaussian_filter(annee_ref, annee, 20)
+        factor_1 = gaussian_filter(annee_ref, annee, 20)
     else:
-        facteur_1 = 1        
+        factor_1 = 1        
 
     sigma = max_users * 1.0
 
     if pd.notnull(votes):
-        facteur_2 = gaussian_filter(votes, max_users, sigma)
+        factor_2 = gaussian_filter(votes, max_users, sigma)
     else:
-        facteur_2 = 0
+        factor_2 = 0
         
-    if sequel(title_main, titre):
+    if sequel(title_main, title):
         note = 0
     else:
-        note = imdb_score**2 * facteur_1 * facteur_2
+        note = imdb_score**2 * factor_1 * factor_2
     
     return note
 
@@ -239,10 +239,10 @@ def find_similarities(df, id_entry, del_sequels = True, verbose = False):
         print(90*'_' + '\n' + "QUERY: films similar to id={} -> '{}'".format(id_entry,
                                 df.iloc[id_entry]['title']))
     #____________________________________
-    liste_films = recommand(df, id_entry)
+    list_films = recommand(df, id_entry)
     #__________________________________
     # Create a list of 31 films
-    parametres_films = extract_parameters(df, liste_films)
+    parametres_films = extract_parameters(df, list_films)
     #_______________________________________
     # Select 5 films from this list
     film_selection = []
@@ -254,9 +254,9 @@ def find_similarities(df, id_entry, del_sequels = True, verbose = False):
     # add new films to complete the list
     film_selection = add_to_selection(film_selection, parametres_films)
     #_____________________________________________
-    selection_titres = []
+    selection_titles = []
     for i,s in enumerate(film_selection):
-        selection_titres.append([s[0].replace(u'\xa0', u''), s[3]])
+        selection_titles.append([s[0].replace(u'\xa0', u''), s[3]])
         if verbose: print("nº{:<2}     -> {:<30}".format(i+1, s[0]))
 
-    return selection_titres
+    return selection_titles
