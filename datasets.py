@@ -40,7 +40,7 @@ def getKeywords(clean=False):
     cleaned_keywords = pd.DataFrame({'movieId': id, 'keywords': keyword})
     cleaned_keywords.to_csv("./clean_datasets/clean_keywords.csv", index=False)
     return cleaned_keywords
-    
+
 def getMetadata(clean=False):
     # Flag to reclean dataset or return cleaned one
     if(not clean):
@@ -91,13 +91,11 @@ def getMetadata(clean=False):
         for genre in ast.literal_eval(genres):
             new_genres += genre
             new_genres += '|'
-    
-    movie_genres.append(new_genres)
+        movie_genres.append(new_genres)
 
     df['movie_genres'].apply(getGenres)
     movie_genres = [x[:-1] for x in movie_genres]
     df = df.assign(genres = movie_genres)
-    df = df.drop(columns = ['movie_genres'])
 
     #Make countries column
     countries = list(df.production_countries)
@@ -138,6 +136,7 @@ def getMetadata(clean=False):
         if(not pd.isnull(obj)):
             return ast.literal_eval(obj)['name']
     df['belongs_to_collection'] = df['belongs_to_collection'].apply(cleanName)
+    df.to_csv("./clean_datasets/clean_metadata.csv")
     return df
 
 def getRatings(clean=False):
@@ -249,7 +248,7 @@ def mergeData(clean = False):
     actors = getActors()
     df = pd.merge(keywords, metadata, on='movieId')
     df2 = pd.merge(df, actors, on='movieId')
-    
+
     df2.to_csv("./clean_datasets/clean_merged.csv", index=False)
-    
+
     return df2
