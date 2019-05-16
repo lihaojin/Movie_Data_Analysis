@@ -7,6 +7,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import ast
+from ast import literal_eval
 from scipy import stats
 import altair as alt
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
@@ -68,49 +70,34 @@ def byRevenue():
     plt.title("Average Gross by the Month for Blockbuster Movies")
     sns.barplot(x='mon', y='revenue', data=month_mean, order=month_order)
 
-def profit_by_genre(df=df):
-    df = df.rename(index=str, columns={"id": "movieId"})
-    df.movieId = df.movieId.astype(int)
-    df.budget = df.budget.astype(float)
-    df.popularity = df.popularity.astype(float)
-    movies_ratings_df = pd.merge(df, ratings_df, on='movieId')
-
-    # calculate the profit/loss for each movie
-    movies_ratings_df['profit_loss'] = movies_ratings_df['revenue'].sub(movies_ratings_df['budget'], axis = 0)
-
-    # replace NaN with 0
-    movies_ratings_df['profit_loss'] = movies_ratings_df['profit_loss'].fillna(0.0)
-
-    # create a dictionary of each genre & retrieve the profit/loss for each genre
+def profitByGenre():
+    """ Bar Graph showing the total profit per genre """
+    meta_df = datasets.getMetadata()
+    meta_df['profit_loss'] = meta_df['revenue'].sub(meta_df['budget'], axis = 0) 
+    meta_df['profit_loss'].fillna(0.0, inplace = True)
     genre_dict = {}
-    for row in range(len(movies_ratings_df)):
-        genre_length = len(movies_ratings_df.movie_genres[row])
+    """ Create genres dictionary """
+    for index, row in meta_df.iterrows():
+        genre_length = len(literal_eval(meta_df.movie_genres[index]))
         for i in range(genre_length):
-            if movies_ratings_df.movie_genres[row][i] in genre_dict:
-                genre_dict[movies_ratings_df.movie_genres[row][i]].append(movies_ratings_df['profit_loss'][row])
+            if literal_eval(meta_df.movie_genres[index])[i] in genre_dict:
+                genre_dict[literal_eval(meta_df.movie_genres[index])[i]].append(meta_df['profit_loss'][index])
             else:
-                genre_dict[movies_ratings_df.movie_genres[row][i]] = []
-                genre_dict[movies_ratings_df.movie_genres[row][i]].append(movies_ratings_df['profit_loss'][row])
-
+                genre_dict[literal_eval(meta_df.movie_genres[index])[i]] = []
+                genre_dict[literal_eval(meta_df.movie_genres[index])[i]].append(meta_df['profit_loss'][index])
     # caculate total profit for each genre
     for genre in genre_dict:
         genre_dict[genre] = np.sum(genre_dict[genre])
 
-    # drop brackets that were stored as a genre
-    genre_dict.pop('[')
-    genre_dict.pop(']')
-
     genre, genre_profit = zip(*genre_dict.items())
     genre_df = pd.DataFrame({'genre':genre, 'profit':genre_profit})
     genre_df.genre = genre_df.genre.astype(str)
-
     """ total profit of each genre """
-    alt.Chart(genre_df).mark_bar().encode(
-        x='genre',
-        y='profit',
-        color='genre'
-    )
-
+    return alt.Chart(genre_df).mark_bar().encode(
+                x='genre',
+                y='profit',
+                color='genre'
+            )
 
 def genreAvgRevenueWordCloud():
     from wordcloud import WordCloud, STOPWORDS
