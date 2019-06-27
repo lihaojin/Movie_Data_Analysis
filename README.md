@@ -25,3 +25,9 @@ pip install NLTK
 ```
 
 Now you are ready to run the script
+
+Frontend
+https://github.com/khelif96/movie_data_frontend
+
+Backend
+https://github.com/khelif96/movie_data_backend
